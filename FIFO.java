@@ -55,7 +55,7 @@ public class FIFO {
     public static void fifoScheduling(List<ProcessData> processDatas) {
         // FIFO = sort by Arrival Time
         processDatas.sort(Comparator.comparingInt(p->p.Arrival_Time)); // extrac Arrival_Time from processDatas and compare and sort
-
+        
         // deining variables needed to calculate avg wt, avg tat
         int Current_Time = 0;
         int Total_Waiting_Time = 0;
@@ -79,7 +79,7 @@ public class FIFO {
             Total_Waiting_Time += processData.Waiting_Time; // add up all the waiting time
             Total_Turnaround_Time += processData.Turnarount_Time; // add up all the turnaround time
 
-            System.out.printf("%3d  %6d  %5d  %10d  %7d  %10d\n", //formatting white space in number of char in name
+            System.out.printf("%3d %6d %5d %10d %7d %10d\n", //formatting white space in number of char in name
             processData.PID, processData.Arrival_Time, processData.Burst_Time, 
             processData.Completion_Time, processData.Waiting_Time, processData.Turnarount_Time); //print datas in such order
 
@@ -92,6 +92,24 @@ public class FIFO {
 
             System.out.printf("\nAverage Waiting Time: %.2f\n", average_WaitingTime); // print avg time next line with 2 decimal
             System.out.printf("\nAverage Turnaround Time: %.2f\n", average_TurnaroundTime);
+
+            GanttChart(processDatas);
+    }
+
+    public static void GanttChart(List<ProcessData> processDatas) { // function to print Gannt CHart
+        System.out.println("\nGantt Chart:"); // printing title as Gantt CHart
+        for (ProcessData p : processDatas) {
+            System.out.print("| P" + p.PID + " "); // separate chart by ID with |
+        }
+        System.out.println("|"); // print | at the end
+
+        int time = 0;
+        System.out.print(time);
+        for (ProcessData p : processDatas) {
+            time += p.Burst_Time; // calculating
+            System.out.printf(" %4d", time); // printing to fit
+        }
+        System.out.println();
     }
 }
 
