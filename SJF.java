@@ -3,6 +3,7 @@ import java.util.*;
 
 class ProcessData {
     int PID, Arrival_Time, Burst_Time, Completion_Time, Waiting_Time, Turnaround_Time;
+    boolean completed = false;
 
     public ProcessData(int PID, int Arrival_Time, int Burst_Time) {
         this.PID = PID;
@@ -40,56 +41,63 @@ public class SJF {
     }
 
     public static void sjfScheduling(List<ProcessData> processDatas) {
-        List<ProcessData> completed = new ArrayList<>();
-        int currentTime = 0, totalWT = 0, totalTAT = 0;
+        int currentTime = 0, totalWT = 0, totalTAT = 0, completedProcesses = 0;
+        int n = processDatas.size();
 
-        System.out.print("Gantt Chart:\n|");
+        System.out.println("\nGantt Chart:");
+        System.out.print("|");
 
-        while (!processDatas.isEmpty()) {
-            final int time = currentTime;
-            List<ProcessData> arrived = new ArrayList<>();
+        while (completedProcesses < n) {
+            ProcessData shortestJob = null;
+            int shortestBurst = Integer.MAX_VALUE;
 
-            for (ProcessData pd : processDatas)
-                if (pd.Arrival_Time <= time) arrived.add(pd);
+            for (ProcessData pd : processDatas) {
+                if (!pd.completed && pd.Arrival_Time <= currentTime && pd.Burst_Time < shortestBurst) {
+                    shortestBurst = pd.Burst_Time;
+                    shortestJob = pd;
+                }
+            }
 
-            if (arrived.isEmpty()) {
+            if (shortestJob == null) {
                 currentTime++;
                 continue;
             }
 
-            arrived.sort(Comparator.comparingInt(p -> p.Burst_Time));
-            ProcessData pd = arrived.get(0);
-            processDatas.remove(pd);
+            shortestJob.Completion_Time = currentTime + shortestJob.Burst_Time;
+            shortestJob.Turnaround_Time = shortestJob.Completion_Time - shortestJob.Arrival_Time;
+            shortestJob.Waiting_Time = shortestJob.Turnaround_Time - shortestJob.Burst_Time;
+            shortestJob.completed = true;
 
-            pd.Completion_Time = currentTime + pd.Burst_Time;
-            pd.Turnaround_Time = pd.Completion_Time - pd.Arrival_Time;
-            pd.Waiting_Time = pd.Turnaround_Time - pd.Burst_Time;
+            totalWT += shortestJob.Waiting_Time;
+            totalTAT += shortestJob.Turnaround_Time;
 
-            totalWT += pd.Waiting_Time;
-            totalTAT += pd.Turnaround_Time;
+            System.out.printf(" P%d |", shortestJob.PID);
 
-            System.out.printf(" P%d |", pd.PID);
-            currentTime = pd.Completion_Time;
-            completed.add(pd);
+            currentTime = shortestJob.Completion_Time;
+            completedProcesses++;
         }
 
-        currentTime = 0;
+        // Printing completion times under Gantt chart
         System.out.println();
+        currentTime = 0;
         System.out.print(currentTime);
+        List<ProcessData> ganttOrder = new ArrayList<>(processDatas);
+        ganttOrder.sort(Comparator.comparingInt(p -> p.Completion_Time));
 
-        for (ProcessData pd : completed) {
-            currentTime = pd.Completion_Time;
-            System.out.printf("%5d", currentTime);
+        for (ProcessData pd : ganttOrder) {
+            System.out.printf("%5d", pd.Completion_Time);
         }
-        System.out.println("\nPID Arrival Burst Completion Waiting Turnaround");
 
-        for (ProcessData pd : completed) {
+        // Printing details for each process
+        System.out.println("\n\nPID Arrival Burst Completion Waiting Turnaround");
+        processDatas.sort(Comparator.comparingInt(p -> p.PID)); // sorting by PID for clearer output
+        for (ProcessData pd : processDatas) {
             System.out.printf("%3d %6d %5d %10d %7d %10d\n",
                 pd.PID, pd.Arrival_Time, pd.Burst_Time,
                 pd.Completion_Time, pd.Waiting_Time, pd.Turnaround_Time);
         }
 
-        System.out.printf("\nAverage Waiting Time: %.2f\n", (double) totalWT / completed.size());
-        System.out.printf("Average Turnaround Time: %.2f\n", (double) totalTAT / completed.size());
+        System.out.printf("\nAverage Waiting Time: %.2f\n", (double) totalWT / n);
+        System.out.printf("Average Turnaround Time: %.2f\n", (double) totalTAT / n);
     }
 }
