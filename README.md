@@ -18,7 +18,7 @@ This project simulates how an Operating System schedules processes using differe
 ### Running the Program
 1. Clone the repository:
    ```sh
-   git clone <repository_url>
+   git clone <[repository_url](https://github.com/OS-Team-Project/Process-Scheduling-Simulation.git)>
    cd <project_directory>
    ```
 2. Compile and run:
